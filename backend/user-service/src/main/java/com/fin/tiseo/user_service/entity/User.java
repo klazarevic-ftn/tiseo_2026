@@ -26,28 +26,29 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "keycloak_subject", unique = true)
+    private String keycloakSubject;
+
     @Column(nullable = false)
     @NotBlank
-    @Size(max = 255)
     private String uci;
 
     @Column(nullable = false)
     @NotBlank
-    @Size(max = 255)
     private String firstName;
 
-    @Column(nullable = true)
-    @Size(max = 255)
+    @Column
     private String middleName;
 
     @Column(nullable = false)
     @NotBlank
-    @Size(max = 255)
     private String lastName;
 
     @Column(nullable = false)
     @NotBlank
-    @Size(max = 255)
     @Email
     private String email;
+
+    @Column(nullable = false)
+    private boolean deleted;
 }

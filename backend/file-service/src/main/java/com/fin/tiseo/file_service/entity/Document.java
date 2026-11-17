@@ -41,4 +41,7 @@ public class Document {
     @NotNull
     @Positive
     private Long userId;
+
+    @Column(nullable = false)
+    private boolean deleted;
 }

@@ -26,11 +26,11 @@ public class StudentAccount {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, precision = 19, scale = 2)
+    private BigDecimal balance;
+
     @Column(name = "student_id", nullable = false, unique = true)
     @NotNull
     @Positive
     private Long studentId;
-
-    @Column(nullable = false, precision = 19, scale = 2)
-    private BigDecimal balance;
 }

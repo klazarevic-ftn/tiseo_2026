@@ -3,6 +3,7 @@ import { RouterLink, RouterOutlet } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
+import { keycloak } from './keycloak';
 
 @Component({
   imports: [RouterLink, RouterOutlet, ButtonModule, MenuModule],
@@ -47,4 +48,10 @@ export class App {
       ]
     }
   ];
+
+  logout(): void {
+    void keycloak.logout({
+      redirectUri: window.location.origin
+    });
+  }
 }

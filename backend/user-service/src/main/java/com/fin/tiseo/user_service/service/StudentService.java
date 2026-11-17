@@ -57,11 +57,18 @@ public class StudentService {
         if (request.getUser() == null || request.getUser().getId() == null || request.getUser().getId() <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An existing user ID is required");
         }
-        User user = userRepository.findByIdForUpdate(request.getUser().getId())
+        User user = userRepository.findWithLockByIdAndDeletedFalse(request.getUser().getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         if (administratorRepository.existsByUserId(user.getId())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "An administrator cannot also be a student");
         }
         return user;
+    }
+
+    public List<Student> findByIds(List<Long> ids) {
+        return repository.findAllById(ids)
+                .stream()
+                .filter(student -> !student.getUser().isDeleted())
+                .toList();
     }
 }
