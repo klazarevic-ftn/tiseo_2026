@@ -19,4 +19,12 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     List<Student> findByUserId(Long userId);
 
     boolean existsByUserId(Long userId);
+
+    @EntityGraph(attributePaths = "user")
+    List<Student> findByIndexContainingIgnoreCaseOrUser_FirstNameContainingIgnoreCaseOrUser_LastNameContainingIgnoreCaseOrUser_EmailContainingIgnoreCase(
+            String index,
+            String firstName,
+            String lastName,
+            String email
+    );
 }

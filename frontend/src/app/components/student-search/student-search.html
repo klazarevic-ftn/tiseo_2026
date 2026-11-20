@@ -1,0 +1,64 @@
+<form class="search-form" (submit)="search($event)">
+  <label>
+    Pretraga studenata
+
+    <input
+      type="search"
+      placeholder="Ime, prezime, email ili broj indeksa"
+      required
+      minlength="2"
+      [value]="query()"
+      (input)="updateQuery($event)"
+    />
+  </label>
+
+  <button
+    pButton
+    type="submit"
+    [disabled]="loading() || query().trim().length < 2"
+  >
+    Pretraži
+  </button>
+</form>
+
+@if (loading()) {
+  <p>Pretraga...</p>
+}
+
+@if (error()) {
+  <p role="alert">{{ error() }}</p>
+}
+
+@if (results().length > 0) {
+  <ul class="search-results">
+    @for (student of results(); track student.id) {
+      <li>
+        <button type="button" (click)="selectStudent(student)">
+          <strong>{{ student.index }}</strong>
+          —
+          {{ student.user.lastName }}
+          {{ student.user.middleName || '' }}
+          {{ student.user.firstName }}
+        </button>
+      </li>
+    }
+  </ul>
+} @else if (searched() && !loading() && !error()) {
+  <p>Nema pronađenih studenata.</p>
+}
+
+@if (selectedStudent(); as student) {
+  <div class="selected-student">
+    <span>
+      <strong>{{ student.index }}</strong>
+      —
+      {{ student.user.lastName }}
+      {{ student.user.middleName || '' }}
+      {{ student.user.firstName }}
+    </span>
+
+    <button pButton type="button" (click)="clearSelection()">
+      Poništi izbor
+    </button>
+  </div>
+}

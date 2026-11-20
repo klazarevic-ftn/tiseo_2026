@@ -20,6 +20,11 @@ public class StudentController {
         return service.findAll(userId);
     }
 
+    @GetMapping("/search")
+    public List<Student> search(@RequestParam String search) {
+        return service.search(search, null);
+    }
+
     @GetMapping("/{id}")
     public Student findById(@PathVariable Long id) {
         return service.findById(id);

@@ -65,6 +65,24 @@ public class StudentService {
         return user;
     }
 
+    public List<Student> search(String search, Long userId) {
+        String text = search.trim();
+
+        if (text.isEmpty()) {
+            return List.of();
+        }
+
+        return repository
+                .findByIndexContainingIgnoreCaseOrUser_FirstNameContainingIgnoreCaseOrUser_LastNameContainingIgnoreCaseOrUser_EmailContainingIgnoreCase(
+                        text, text, text, text
+                )
+                .stream()
+                .filter(student -> !student.getUser().isDeleted())
+                .filter(student -> userId == null
+                        || student.getUser().getId().equals(userId))
+                .toList();
+    }
+
     public List<Student> findByIds(List<Long> ids) {
         return repository.findAllById(ids)
                 .stream()

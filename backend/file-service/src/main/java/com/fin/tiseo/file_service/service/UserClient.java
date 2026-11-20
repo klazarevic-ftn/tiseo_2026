@@ -1,14 +1,12 @@
 package com.fin.tiseo.file_service.service;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestClientResponseException;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class UserClient {
@@ -23,52 +21,62 @@ public class UserClient {
     }
 
     public Access currentUser(Jwt jwt) {
-        return read("/api/users/me/access", jwt);
+        Profile profile = read("/api/users/me", jwt);
+
+        return new Access(
+                profile.user().id(),
+                hasRole(jwt, "STUDENT"),
+                hasRole(jwt, "ADMINISTRATOR")
+        );
     }
 
     public Access user(Long userId, Jwt jwt) {
-        return read("/api/users/" + userId + "/access", jwt);
+        Profile profile = read("/api/users/" + userId, jwt);
+
+        return new Access(
+                profile.user().id(),
+                profile.students() != null && !profile.students().isEmpty(),
+                profile.administrator() != null
+        );
     }
 
-    private Access read(String path, Jwt jwt) {
-        try {
-            RestClient.RequestHeadersSpec<?> request = client.get().uri(path);
+    private Profile read(String path, Jwt jwt) {
+        RestClient.RequestHeadersSpec<?> request =
+                client.get().uri(path);
 
-            request.header(
-                    HttpHeaders.AUTHORIZATION,
-                    "Bearer " + jwt.getTokenValue()
-            );
+        request.headers(headers ->
+                headers.setBearerAuth(jwt.getTokenValue()));
 
-            Access access = request.retrieve().body(Access.class);
+        return request.retrieve().body(Profile.class);
+    }
 
-            if (access == null || access.userId() == null) {
-                throw new ResponseStatusException(
-                        HttpStatus.SERVICE_UNAVAILABLE,
-                        "Invalid response from User service"
-                );
-            }
+    private boolean hasRole(Jwt jwt, String role) {
+        Map<String, Object> realmAccess =
+                jwt.getClaimAsMap("realm_access");
 
-            return access;
-        } catch (RestClientResponseException exception) {
-            int status = exception.getStatusCode().value();
+        return realmAccess != null
+                && realmAccess.get("roles") instanceof List<?> roles
+                && roles.contains(role);
+    }
 
-            if (status == 401 || status == 403 || status == 404) {
-                throw new ResponseStatusException(
-                        exception.getStatusCode(),
-                        "User access denied or user not found"
-                );
-            }
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record Profile(
+            UserData user,
+            List<StudentData> students,
+            AdministratorData administrator
+    ) {
+    }
 
-            throw new ResponseStatusException(
-                    HttpStatus.SERVICE_UNAVAILABLE,
-                    "User service is unavailable"
-            );
-        } catch (RestClientException exception) {
-            throw new ResponseStatusException(
-                    HttpStatus.SERVICE_UNAVAILABLE,
-                    "User service is unavailable"
-            );
-        }
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record UserData(Long id) {
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record StudentData(Long id) {
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record AdministratorData(Long id) {
     }
 
     public record Access(

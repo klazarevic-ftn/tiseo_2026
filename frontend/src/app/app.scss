@@ -36,3 +36,31 @@
   flex: 1;
   min-width: 0;
 }
+
+.header-identity {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.header-logo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: brightness(0) invert(1);
+}
+
+.header-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.header-person {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}

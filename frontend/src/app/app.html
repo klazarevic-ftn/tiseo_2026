@@ -1,6 +1,37 @@
 <div class="app-layout">
   <header class="app-header">
-    <strong>FIN</strong>
+    <div class="header-identity">
+      <img
+        class="header-logo"
+        src="/logo.png"
+        alt="Fakultet Izmišljenih Nauka"
+      />
+
+      <div class="header-details">
+        <strong>Fakultet Izmišljenih Nauka</strong>
+
+        @if (profile(); as data) {
+          <div class="header-person">
+            @if (data.students.length > 0) {
+              <span>{{ data.students[0].index }} -</span>
+            }
+
+            <span>{{ data.user.lastName }}</span>
+
+            @if (data.user.middleName) {
+              <span>{{ data.user.middleName }}</span>
+            }
+
+            <span>{{ data.user.firstName }}</span>
+          </div>
+        } @else if (profileError()) {
+          <span>Podaci o korisniku nisu dostupni.</span>
+        } @else {
+          <span>Učitavanje...</span>
+        }
+      </div>
+    </div>
+
     <button pButton type="button" (click)="logout()">Odjava</button>
   </header>
 

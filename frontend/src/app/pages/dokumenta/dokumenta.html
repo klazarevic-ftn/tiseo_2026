@@ -1,1 +1,128 @@
 <h1>Dokumenta</h1>
+
+@if (isAdmin) {
+  <app-student-search
+    (studentSelected)="onStudentSelected($event)"
+  />
+}
+
+@if (isStudent) {
+  <form #uploadForm (submit)="upload($event, uploadForm)">
+    <label for="document-file">Dokument</label>
+
+    <input
+      id="document-file"
+      type="file"
+      required
+      [disabled]="uploading()"
+      (change)="selectFile($event)"
+    />
+
+    <button
+      pButton
+      type="submit"
+      [disabled]="!selectedFile() || uploading()"
+    >
+      {{ uploading() ? 'Otpremanje...' : 'Otpremi dokument' }}
+    </button>
+  </form>
+}
+
+@if (message()) {
+  <p role="status">{{ message() }}</p>
+}
+
+@if (isAdmin && !selectedStudent()) {
+  <p>Izaberite studenta za pregled dokumenata.</p>
+} @else if (loading()) {
+  <p>Učitavanje...</p>
+} @else {
+  <table class="document-table">
+    <thead>
+    <tr>
+      <th>Naziv dokumenta</th>
+
+      @if (isAdmin) {
+        <th>Radnje</th>
+      }
+    </tr>
+    </thead>
+
+    <tbody>
+      @for (document of documents(); track document.id) {
+        <tr>
+          <td>
+            <button
+              type="button"
+              class="document-name"
+              (click)="openPreview(document)"
+            >
+              {{ document.fileName }}
+            </button>
+          </td>
+
+          @if (isAdmin) {
+            <td>
+              <div class="document-actions">
+                <button
+                  pButton
+                  type="button"
+                  [disabled]="saving()"
+                  (click)="editDocument(document)"
+                >
+                  Izmeni
+                </button>
+
+                <button
+                  pButton
+                  type="button"
+                  [disabled]="saving()"
+                  (click)="deleteDocument(document)"
+                >
+                  Obriši
+                </button>
+              </div>
+            </td>
+          }
+        </tr>
+      } @empty {
+        <tr>
+          <td [attr.colspan]="isAdmin ? 2 : 1">
+            Nema otpremljenih dokumenata.
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}
+
+<app-modal
+  [title]="previewName()"
+  width="75rem"
+  [(visible)]="previewVisible"
+  (closed)="clearPreview()"
+>
+  @if (previewLoading()) {
+    <p>Učitavanje dokumenta...</p>
+  } @else if (previewError()) {
+    <p>{{ previewError() }}</p>
+  } @else if (previewUrl(); as url) {
+    <iframe
+      class="document-preview"
+      [src]="url"
+      [title]="previewName()"
+    ></iframe>
+  } @else {
+    <p>Pregled ovog formata nije dostupan. Dokument možete preuzeti.</p>
+  }
+
+  <button
+    modalFooter
+    pButton
+    type="button"
+    [disabled]="previewLoading() || !!previewError()"
+    (click)="downloadPreview()"
+  >
+    Preuzmi
+  </button>
+</app-modal>

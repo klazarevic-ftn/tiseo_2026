@@ -81,7 +81,14 @@ public class DocumentService {
                     HttpStatus.BAD_REQUEST, "Invalid file");
         }
 
+        String extension = StringUtils.getFilenameExtension(fileName);
+
         String key = "users/" + ownerId + "/" + UUID.randomUUID();
+
+        if (extension != null && extension.matches("[A-Za-z0-9]{1,16}")) {
+            key += "." + extension;
+        }
+
         storage.upload(key, file);
 
         Document document = new Document();
